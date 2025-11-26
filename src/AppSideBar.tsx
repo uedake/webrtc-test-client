@@ -32,7 +32,7 @@ type Props = {
     topicMsg: Record<string, PubStat>
 };
 
-export const AppSideBar: React.FC<Props> = (props) => {
+export const AppSideBar: React.FC<Props> = () => {
     const [roomName, setRoomName] = useState("testroom")
 
     const room = useRoomContext()
@@ -61,11 +61,11 @@ export const AppSideBar: React.FC<Props> = (props) => {
 
     useEffect(() => {
         room.on(RoomEvent.TrackMuted, (pub) => {
-            console.log('Track muted');
+            console.log('Track muted',pub.trackSid);
         });
 
         room.on(RoomEvent.TrackUnmuted, (pub) => {
-            console.log('Track unmuted');
+            console.log('Track unmuted',pub.trackSid);
         });
     }, [room]);
 
