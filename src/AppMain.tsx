@@ -21,7 +21,7 @@ import { TopicTable, type PubStat } from "./TopicTable"
 
 export function AppMain() {
   const [topicMsg, setTopicMsg] = useState<Record<string, PubStat>>({})
-  const data = useDataChannel(
+  useDataChannel(
     (message) => {
       if (message && message.topic) {
         const topic: string = message.topic
