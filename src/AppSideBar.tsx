@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from "axios";
+// import axios from "axios";
 import {
     useConnectionState,
     useRoomContext,
@@ -12,21 +12,16 @@ import { RoomEvent } from 'livekit-client'
 import { Sidebar, SidebarContent, SidebarHeader } from "./components/ui/sidebar"
 import { Input } from "./components/ui/input";
 import { Field, FieldLabel } from "./components/ui/field";
+import { Button } from "./components/ui/button";
 
 import { type PubStat } from "./TopicTable"
-
+import { useAuthContext } from "./config/AuthContext";
 
 const serverUrl = 'wss://test-rh5n4iee.livekit.cloud';
 
 type TokenResponse = {
     token: string;
 };
-
-async function getToken(identity: string, userName: string, roomName: string) {
-    const url = `https://sample-api.wal-test.com/test/livekit_token?room_name=${roomName}&identity=${identity}&username=${userName}`
-    const res = await axios.get<TokenResponse>(url);
-    return res.data.token
-}
 
 type Props = {
     topicMsg: Record<string, PubStat>
@@ -43,6 +38,21 @@ export const AppSideBar: React.FC<Props> = () => {
         undefined,
         { onlySubscribed: false },
     )
+    const { api,user,handleSignOut } = useAuthContext()
+
+    async function getToken(identity: string, userName: string, roomName: string) {
+        // const url = `https://sample-api.wal-test.com/test/livekit_token?room_name=${roomName}&identity=${identity}&username=${userName}`
+        // const res = await axios.get<TokenResponse>(url);
+        // return res.data.token
+        const res: TokenResponse = await api.call("GET", "livekit_token", {
+            queryParams: {
+                room_name: roomName,
+                identity,
+                username: userName
+            }
+        })
+        return res.token
+    }
 
     useEffect(() => {
         const connect = async () => {
@@ -61,17 +71,18 @@ export const AppSideBar: React.FC<Props> = () => {
 
     useEffect(() => {
         room.on(RoomEvent.TrackMuted, (pub) => {
-            console.log('Track muted',pub.trackSid);
+            console.log('Track muted', pub.trackSid);
         });
 
         room.on(RoomEvent.TrackUnmuted, (pub) => {
-            console.log('Track unmuted',pub.trackSid);
+            console.log('Track unmuted', pub.trackSid);
         });
     }, [room]);
 
     return (
         <Sidebar>
             <SidebarHeader>
+                <Button onClick={handleSignOut}>sign out ({user.username})</Button>
                 <Field>
                     <FieldLabel htmlFor="roomName">Room : {connectionState}</FieldLabel>
                     <Input id="roomName" value={roomName} onChange={(e) => setRoomName(e.target.value)} />
